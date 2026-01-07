@@ -3,23 +3,14 @@ const Header = (props) => {
 }
 
 const Part = (props) => {
-  return (<p>{props.part} {props.excercises}</p>)
+  return (<p>{props.part?.name} {props.part?.exercises}</p>) // Optional chaining to avoid errors if part is undefined
 }
 
 const Content = (props) => {
   return (
     <div>
       <Part
-        part={props.parts?.[0]?.name}
-        exercises={props.parts?.[0]?.exercises} //optional chaining must be done before the array indexing to prevent a type error of  accessing a propery of undefined.
-      />
-      <Part
-        part={props.parts?.[1]?.name}
-        exercises={props.parts?.[1]?.exercises}
-      />
-      <Part
-        part={props.parts?.[2]?.name}
-        exercises={props.parts?.[2]?.exercises}
+        part={props.part}
       />
     </div>
   )
@@ -48,9 +39,9 @@ const App = () => {
 
   return (<div>
       <Header course = {course}/>
-      <Content part = {part1.name} excercises = {part1.exercises}/>
-      <Content part = {part2.name} excercises = {part2.exercises}/>
-      <Content part = {part3.name} excercises = {part3.exercises}/>
+      <Content part = {part1} />
+      <Content part = {part2}/>
+      <Content part = {part3} />
       <Total excercises1 = {part1.exercises} excercises2 = {part2.exercises} excercises3 = {part3.exercises}/>
   </div>)
     
