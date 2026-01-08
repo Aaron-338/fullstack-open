@@ -8,7 +8,9 @@ const Button = ({onclick, text}) => (
 
 const Header = ({header}) => <h1>{header}</h1> 
 
-const Statistics = ({item, count}) => <p>{item} {count}</p>
+const Statistics = (props) => props.items.map(
+                              (key, index) => 
+                              <p key={index}>{key.item} {key.count}</p>)
 
 const App = () => {
   // save clicks of each button to its own state
@@ -16,10 +18,15 @@ const App = () => {
   const [neutral, setNeutral] = useState(0)
   const [bad, setBad] = useState(0)
 
-  let all = good + bad + neutral
-  let average = all === 0 ?  0 : (good - bad)/all
-  let positive = all === 0 ? 0 : ((good / all) * 100) + '%'
-
+  const all = good + bad + neutral
+  const average = all === 0 ?  0 : (good - bad)/all
+  const positive = all === 0 ? "0 %" : ((good / all) * 100) + ' %'
+  const statistics = [ {item : "good" , count : good}
+                      ,{item : "neutral" , count : neutral}
+                      ,{item : "bad" , count : bad}
+                      ,{item : "all" , count : all}
+                      ,{item : "average" , count : average}
+                      ,{item : "positive" , count : positive}]
   return (
     <div>
       <Header header="give feedback" />
@@ -27,12 +34,7 @@ const App = () => {
       <Button onclick={() => setNeutral(neutral + 1)} text="neutral"/>
       <Button onclick={() => setBad(bad + 1)} text="bad"/>
       <Header header="statistics" />
-      <Statistics item="good" count={good} />
-      <Statistics item="neutral" count={neutral} />
-      <Statistics item="bad" count={bad} />
-      <Statistics item= "all" count={all} />
-      <Statistics item="average" count={ average} />
-      <Statistics item="positive" count={positive} />
+      <Statistics items={statistics}/>
     </div>
   )
 }
