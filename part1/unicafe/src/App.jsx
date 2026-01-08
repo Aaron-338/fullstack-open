@@ -8,10 +8,16 @@ const Button = ({onclick, text}) => (
 
 const Header = ({header}) => <h1>{header}</h1> 
 
-const Statistics = (props) => props.items.map(
+const Statistics = (props) => { return (
+                              props.items[0].count
+                               + props.items[1].count
+                               + props.items[2].count === 0 ? 
+                              <p>No feedback given</p> :
+                              props.items.map(
                               (key, index) => 
-                              <p key={index}>{key.item} {key.count}</p>)
-
+                              <p key={index}>{key.item} {key.count}</p>))
+                            }
+                            
 const App = () => {
   // save clicks of each button to its own state
   const [good, setGood] = useState(0)
