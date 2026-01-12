@@ -1,26 +1,34 @@
 const Course = ({course}) => {
   console.log("course",course.name)
-  for (const part in course.parts) console.log(part.name,"",part.exercises)
+  course.parts.forEach((part) => console.log(part.name , part.exercises))
   
   return (
-    <Header>header={course.name}</Header>,
-    <Content>content={course.parts}</Content>
+    
+    <div>
+      <Header header={course.name}/>
+    <Content content={course.parts}/>
+    </div>
   )
 }
-
-const Header = ({name}) => <h1>{name}</h1>
-
-const Content = ({parts}) => (
-  <div>
-    <Part part={props.parts[0]} />
-    <Part part={props.parts[1]} />
-    <Part part={props.parts[2]} />
-  </div>
+const Total = ({total}) => <h3>total of { total } exercises</h3>
+const Header = ({header}) => {
+  
+  console.log("this is the header ," , header )
+  return (<h1>{header}</h1>)
+}
+const Content = (props) => {
+  console.log(props.content)
+  
+  return (
+  
+    props.content.map((part , index) => <Part key= {index} part = {part} />)
+  
 )
+}
 
-const Part = (props) => (
+const Part = ({part}) => (
   <p>
-    {props.part.name} {props.part.exercises}
+    {part.name} {part.exercises}
   </p>
 )
 
@@ -48,8 +56,12 @@ const App = () => {
       }
     ]
   }
+ const total = course.parts.reduce((total , part) => total + part.exercises , 0) 
 
-  return <Course course={course} />
+  return <>
+  <Course course={course} />
+  <Total total = {total}/>
+  </>
 }
 
 export default App
