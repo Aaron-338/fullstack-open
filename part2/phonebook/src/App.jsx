@@ -9,7 +9,17 @@ const App = () => {
   const addPerson = (event) => {
     console.log("button clicked  ")
     event.preventDefault()
-    setPersons(persons.concat(newName))
+    const newPerson = {name:newName}
+    if(persons.find(person => person.name.toLocaleLowerCase() === newName.toLocaleLowerCase()))
+    {
+      alert(`${newName} is already added to phonebook`)
+      console.log("a duplicate was found")
+      return
+    }
+    setPersons(persons.concat(newPerson))
+    console.log("no duplicte was found")
+    persons.forEach((person) => console.log(person.name))
+    setNewName('')
   }
 
   const handleNameChange = (event) => {
