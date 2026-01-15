@@ -1,9 +1,18 @@
+import phonebookService from './services/phonebook'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
-const Contact = ({person}) => <div>{person.name} {person.number}</div>
+const Contact = ({person, handleDelete}) => (
+  <div>
+    {person.name} {person.number} 
+    <button onClick={() => handleDelete(person.id)}>delete</button>
+  </div>
+)
 
-const Persons = ({persons}) => persons.map((person,index) => <Contact person={person} key={index}></Contact>)
+const Persons = ({persons, handleDelete}) => 
+  persons.map((person, index) => 
+    <Contact person={person} key={person.id} handleDelete={handleDelete} />
+  )
 
 const PersonForm = ({newName,newNumber,addPerson,handleNameChange,handleNumberChange}) => {
   return (
@@ -26,34 +35,81 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
   
-  const hook = () => {
-  console.log('effect')
-  axios
-    .get('http://localhost:3001/persons')
-    .then(response => {
-      console.log('promise fulfilled')
-      setPersons(response.data)
+  useEffect(() => {
+  phonebookService
+    .getAll()
+    .then(initialPersons => {
+      setPersons(initialPersons)
     })
-  }
-  useEffect(hook, [])
+}, [])
+
   console.log('render', persons.length, 'persons')
-  const addPerson = (event) => {
-    console.log("button clicked")
-    event.preventDefault()
-    const newPerson = {name:newName , number:newNumber , id: persons.length+1}
-    
-    if(persons.find(person => person.name.toLowerCase() === newName.toLowerCase())) {
-      alert(`${newName} is already added to phonebook`)
-      console.log("a duplicate name was found")
-      return
+  
+const handleDelete = (id) => {
+    const person = persons.find(p => p.id === id)
+  
+    if (window.confirm(`Delete ${person.name}?`)) {
+      phonebookService
+        .remove(id)
+        .then(() => {
+          setPersons(persons.filter(p => p.id !== id))
+        })
+        .catch(error => {
+          alert(`Error occured deleting ${person.name}`)
+          console.log(error , error)
+        })
     }
-    
-    setPersons(persons.concat(newPerson))
-    console.log("no duplicate name was found")
-    persons.forEach((person) => console.log(person.name, person.number, person.id))
-    setNewName('')
-    setNewNumber('')
   }
+
+  const addPerson = (event) => {
+  console.log("button clicked")
+  event.preventDefault()
+  
+  const newContact = {
+    name: newName, 
+    number: newNumber
+  } //the id property is left for the server to create
+  
+  // Case-insensitive check for existing person
+  const existingPerson = persons.find(
+    person => person.name.toLowerCase() === newName.toLowerCase()
+  )
+  
+  if (existingPerson) {
+    // Ask user if they want to update the number
+    if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+      phonebookService
+        .update(existingPerson.id, newContact)
+        .then(returnedPerson => {
+          setPersons(persons.map(person => 
+            person.id !== existingPerson.id ? person : returnedPerson
+          ))
+          console.log("Number updated successfully!")
+          setNewName('')
+          setNewNumber('')
+        })
+        .catch(error => {
+          console.log('Error updating:', error)
+          alert(`Error occured updating ${newName}'s number`)
+        })
+    }
+    return
+  }
+  
+  // Add new person if doesn't exist
+  phonebookService
+    .create(newContact)
+    .then(returnedPerson => {
+      setPersons(persons.concat(returnedPerson))
+      console.log("Entry successful!")
+      setNewName('')
+      setNewNumber('')
+    })
+    .catch(error => {
+      console.log('Error:', error)
+      alert('Error adding person to phonebook')
+    })
+}
 
   const handleNameChange = (event) => {
     console.log(event.target.value)
@@ -89,7 +145,7 @@ const App = () => {
         />
         
         <h3>Numbers</h3>
-        <Persons persons={personsToShow} />
+        <Persons persons={personsToShow} handleDelete={handleDelete} />
       </div>
   )
 }
