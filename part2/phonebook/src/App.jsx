@@ -1,6 +1,6 @@
 import phonebookService from './services/phonebook'
+import Notification from './components/Notification'
 import { useState, useEffect } from 'react'
-import axios from 'axios'
 
 const Contact = ({person, handleDelete}) => (
   <div>
@@ -34,7 +34,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
-  
+  const [notificationMessage, setNotificationMessage] = useState(null)
+  const [notificationType, setNotificationType] = useState('success')  
   useEffect(() => {
   phonebookService
     .getAll()
@@ -44,6 +45,14 @@ const App = () => {
 }, [])
 
   console.log('render', persons.length, 'persons')
+
+const showNotification = (message, type) => {
+    setNotificationMessage(message)
+    setNotificationType(type)
+    setTimeout(() => {
+      setNotificationMessage(null)
+    }, 5000)
+  }
   
 const handleDelete = (id) => {
     const person = persons.find(p => p.id === id)
@@ -53,9 +62,10 @@ const handleDelete = (id) => {
         .remove(id)
         .then(() => {
           setPersons(persons.filter(p => p.id !== id))
+          showNotification(`Deleted ${person.name}` , 'success')
         })
         .catch(error => {
-          alert(`Error occured deleting ${person.name}`)
+          showNotification(`Error occured deleting ${person.name}`, 'error')
           console.log(error , error)
         })
     }
@@ -84,13 +94,19 @@ const handleDelete = (id) => {
           setPersons(persons.map(person => 
             person.id !== existingPerson.id ? person : returnedPerson
           ))
-          console.log("Number updated successfully!")
+          showNotification(`Updated ${newName} 's number`, 'success')
           setNewName('')
           setNewNumber('')
         })
         .catch(error => {
           console.log('Error updating:', error)
-          alert(`Error occured updating ${newName}'s number`)
+          showNotification(
+            `Information of ${newName} has already been removed from server`,
+            'error'
+          )
+          setPersons(persons.filter(p => p.id !== existingPerson.id))
+          setNewName('')
+          setNewNumber('')
         })
     }
     return
@@ -101,13 +117,14 @@ const handleDelete = (id) => {
     .create(newContact)
     .then(returnedPerson => {
       setPersons(persons.concat(returnedPerson))
+      showNotification(`Added ${newName}`, 'success')
       console.log("Entry successful!")
       setNewName('')
       setNewNumber('')
     })
     .catch(error => {
       console.log('Error:', error)
-      alert('Error adding person to phonebook')
+      showNotification('Error adding person to phonebook', 'error')
     })
 }
 
@@ -133,6 +150,7 @@ const handleDelete = (id) => {
   return ( 
       <div>
         <h2>Phonebook</h2>
+        <Notification message={notificationMessage} type={notificationType}></Notification>
         <Filter filter={filter} handleFilterChange={handleFilterChange} />
         
         <h3>Add a new</h3>
