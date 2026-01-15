@@ -65,7 +65,7 @@ const handleDelete = (id) => {
           showNotification(`Deleted ${person.name}` , 'success')
         })
         .catch(error => {
-          showNotification(`Information of ${person.name} has already been remove from the server`, 'error')
+          showNotification(`Information of ${person.name} has already been remove from server`, 'error')
           console.log(error , error)
         })
     }
